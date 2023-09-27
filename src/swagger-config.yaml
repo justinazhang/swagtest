@@ -1,0 +1,213 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: GNS API
+
+# Under securityDefinitions we declare which security schemes can be used.
+# These definitions do not affect to the operations, but can be applied
+# using the 'security' key at the global level or the operation level.
+# In this sample, we'll see how to apply the security definition globally,
+# and override it at the operation level.
+#
+# Note that for Password Flow, you must provide the Token URL.
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+# Here we apply the security flow called 'password' globally to all the operations in the spec.
+# This security scheme is defined above in the 'securityDefinitions' section.
+# Global security can be overridden an operation level as seen in the example below
+security:
+ - Bearer: []
+
+tags:
+- name: users
+  description: 사용자
+- name: messages
+  description: 메세지
+
+paths:
+  /users/signup:
+    post:
+      tags:
+        - users
+      summary: 회원 가입
+      parameters:
+        - in: body
+          name: user info
+          schema:
+            properties:
+              email:
+                type: string
+                example: abc@abc.com
+              password:
+                type: string
+                example: abc1234
+            required:
+              - email
+              - password
+      responses:
+        201:
+          description: Created
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+        400:
+          description: invalid parameters
+          schema:
+            type: string
+            example: Email already exists
+  /users/signin:
+    post:
+      tags:
+        - users
+      summary: 로그인
+      parameters:
+        - in: body
+          name: user info
+          schema:
+            properties:
+              email:
+                type: string
+                example: abc@abc.com
+              password:
+                type: string
+                example: abc1234
+            required:
+              - email
+              - password
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+        400:
+          description: invalid parameters
+          schema:
+            type: string
+            example: Incorrect password
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: 사용자 정보 조회
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                example: abc@abc.com
+              id:
+                type: integer
+                example: 1
+        401:
+          description: invalid or expired authorization token
+          schema:
+            type: string
+            example: Incorrect authorization scheme
+
+  /message:
+    post:
+      tags:
+        - messages
+      summary: 메세지 등록
+      parameters:
+        - in: body
+          name: message body
+          schema:
+            type: object
+            properties:
+              to:
+                type: string
+                description: 메세지 수신자 email
+              title:
+                type: string
+                description: 메세지 제목
+              body:
+                type: string
+                description: 메세지 내용
+              userId:
+                type: number
+                description: 메세지 발신자 ID
+            required:
+              - to
+              - userId
+      responses:
+        201:
+          description: Created
+          schema:
+            type: object
+            properties:
+              to:
+                type: string
+              title:
+                type: string
+              body:
+                type: string
+              userId:
+                type: number
+              id:
+                type: number
+        403:
+          description: Forbidden
+          schema:
+            type: string
+            example: "Private resource creation: request body must have a reference to the owner id"
+    get:
+      tags:
+        - messages
+      summary: 메세지 전체 조회
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                to:
+                  type: string
+                title:
+                  type: string
+                body:
+                  type: string
+                userId:
+                  type: number
+                id:
+                  type: number
+  /message/{message_id}:
+    delete:
+      tags:
+        - messages
+      summary: 메세지 삭제
+      parameters:
+        - in: path
+          name: message_id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Ok
+        401:
+          description: Unauthorized
+          schema:
+            type: string
+            example: "Cannot read property 'userId' of undefined"
+
+
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /mulder21c/coding-test/1.0.0
+schemes:
+ - https
+ - http
